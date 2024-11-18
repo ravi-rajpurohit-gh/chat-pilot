@@ -11,6 +11,18 @@ st.set_page_config(
     layout="centered"
 )
 
+# # Inject custom CSS for background color
+# st.markdown(
+#     """
+#     <style>
+#     body {
+#         background-color: #f0f0f0; /* Light gray background */
+#     }
+#     </style>
+#     """,
+#     unsafe_allow_html=True
+# )
+
 ## Page Title
 st.title('Chat-Pilot')
 

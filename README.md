@@ -1,26 +1,25 @@
-# ChatPilot
+# Chat-Pilot 🚀
 
-Welcome to **ChatPilot** – a streamlined and intelligent chat application powered by **LangChain**, **OpenAI API**, and **Streamlit**. This project aims to deliver personalized, efficient, and engaging user interactions.
+[![Chat-Pilot App](https://img.shields.io/badge/Streamlit-Visit_App-red)](https://chat-pilot.streamlit.app/)
 
-## ✨ Features
+**Chat-Pilot** is an evolving chat application built with **Streamlit** and **OpenAI API**, designed to deliver seamless and dynamic user interactions. This project explores personalized chat interfaces and advanced features.
 
-- **Personalized Responses**: Utilizing advanced language models to provide tailored responses to user inputs.
-- **Memory Store**: Selective response storage to retain prompts and enhance user experience. 
+## 🌟 Features
+- **Interactive Chat Interface**: Built with **Streamlit** for an intuitive user experience.
+- **AI-Powered Responses**: Uses **OpenAI GPT-3.5** for real-time, conversational answers.
+- **Future Enhancements**:
+  - **Memory Store**: Save and revisit key prompts.
+  - **LangChain Integration**: Expand capabilities with advanced pipelines.
 
-## 🛠️ Status
+## 🚀 Live Demo
+Check out the app: [Chat-Pilot](https://chat-pilot.streamlit.app/)
 
-This project is **under development**. Stay tuned – exciting features and functionalities will be rolling out soon!
+## 🛠️ Technologies Used
+- **Streamlit** for the frontend interface.
+- **OpenAI API** for conversational AI.
+- **Streamlit Cloud** for deployment.
 
----
-
-## 💡 Coming Soon
-
-The **ChatPilot** repository is actively being developed, and the first version will be live soon. Watch this space for updates! 🚀
-
-## 📋 Contributing
-
-Contributions are welcome! Feel free to open issues or submit pull requests to help shape this project.
-
----
-
-Stay connected and let's build something amazing! 💬
+## 📧 Contact
+Have feedback or suggestions? Feel free to reach out:
+- **Email**: ravirajpurohit414@gmail.com
+- **LinkedIn**: Connect with me [here!](https://www.linkedin.com/in/ravi-rajpurohit/)
