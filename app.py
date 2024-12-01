@@ -9,6 +9,9 @@ import random
 #         css = f"<style>{f.read()}</style>"
 #         st.markdown(css, unsafe_allow_html=True)
 
+def set_topic(topic):
+    st.session_state.topic = topic
+
 def set_subject():
     if st.session_state.subject_code == 0:
         st.session_state.subject_string = ""
@@ -26,14 +29,15 @@ st.set_page_config(
     layout="centered"
 )
 
-# load_css()
-
 ## Load/Create session variables
 if "openai_model" not in st.session_state:
     st.session_state["openai_model"] = "gpt-4o-mini"
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
+
+if "topic" not in st.session_state:
+    st.session_state.topic = None
 
 if "subject_string" not in st.session_state:
     st.session_state["subject_string"] = ""
@@ -43,6 +47,29 @@ if "subject_code" not in st.session_state:
 
 ## Page Title
 st.header('Chat-Pilot', divider="green")
+
+
+
+
+# ## create a topic selector -
+topic_map = {
+    "Technology": ":material/computer:",
+    "Marketing": ":material/monitoring:",
+    "Fitness": ":material/exercise:",
+}
+
+selection = st.pills(
+    label="Choose a topic (optional)",
+    options=topic_map.keys(),
+    selection_mode="single",
+    format_func=lambda topic: topic_map[topic] + "  " + topic,
+    key="chat-topic"
+)
+
+
+
+
+
 
 # Creating three columns for horizontal button alignment
 col1, col2, col3 = st.columns(3)
