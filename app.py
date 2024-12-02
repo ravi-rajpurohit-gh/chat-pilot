@@ -88,7 +88,7 @@ error_messages = [
 ]
 
 ## --------------------------- USER INPUT & GEMINI API INTERACTION ---------------------------
-user_prompt = st.chat_input("Ask Gemini-Pro...")
+user_prompt = st.chat_input("Message Chat-Pilot")
 if user_prompt:
     # Add user's message to chat and display it
     st.chat_message("user").markdown(user_prompt)
