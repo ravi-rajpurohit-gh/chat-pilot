@@ -1,0 +1,3 @@
+- use st.segmented_control for choosing between models
+-- -- use callback to invoke model and transfer context
+-- -- choose model at chat-pilot title
