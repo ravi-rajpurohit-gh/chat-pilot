@@ -1,13 +1,13 @@
 ## --------------------------- IMPORT LIBRARIES ---------------------------
-import openai
-from openai import OpenAI
 import streamlit as st
 import random
+import google.generativeai as gen_ai
+import os
 
 ## --------------------------- HELPER FUNCTIONS ---------------------------
 def set_subject(topic):
     """
-    Sets the subject code and subject string based on the selected topic.
+    Sets the subject string based on the selected topic.
     """
     if topic == "Technology":
         st.session_state.subject_string = "Act like a technology expert and help me with this conversation."
@@ -18,6 +18,13 @@ def set_subject(topic):
     else:  # No topic selected
         st.session_state.subject_string = ""
 
+# Function to translate roles between Gemini-Pro and Streamlit terminology
+def translate_role_for_streamlit(user_role):
+    if user_role == "model":
+        return "assistant"
+    else:
+        return user_role
+
 ## --------------------------- STREAMLIT PAGE CONFIGURATION ---------------------------
 st.set_page_config(
     page_title="Chat-Pilot",
@@ -26,12 +33,19 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-## --------------------------- SESSION STATE INITIALIZATION ---------------------------
-if "openai_model" not in st.session_state:
-    st.session_state.openai_model = "gpt-4o-mini"
+## --------------------------- INITIALIZE GEMINI CLIENT ---------------------------
+# Set your Google Gemini API key
+GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
+gen_ai.configure(api_key=GOOGLE_API_KEY)
+model = gen_ai.GenerativeModel('gemini-pro')
 
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+## --------------------------- SESSION STATE INITIALIZATION ---------------------------
+if "gemini_model" not in st.session_state:
+    st.session_state.gemini_model = "gemini-pro"
+
+# Initialize chat session in Streamlit if not already present
+if "chat_session" not in st.session_state:
+    st.session_state.chat_session = model.start_chat(history=[])
 
 if "subject_string" not in st.session_state:
     st.session_state.subject_string = ""
@@ -60,14 +74,10 @@ selection = st.pills(
 # Update subject state based on the selected pill
 set_subject(selection)
 
-## --------------------------- INITIALIZE OPENAI CLIENT ---------------------------
-OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
-client = OpenAI(api_key=OPENAI_API_KEY)
-
 ## --------------------------- DISPLAY CHAT HISTORY ---------------------------
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+for message in st.session_state.chat_session.history:
+    with st.chat_message(translate_role_for_streamlit(message.role)):
+        st.markdown(message.parts[0].text)
 
 ## --------------------------- ERROR MESSAGES ---------------------------
 error_messages = [
@@ -77,48 +87,31 @@ error_messages = [
     "**The API quota has been reached.**\nTry again later or adjust your usage limits."
 ]
 
-## --------------------------- USER INPUT & API INTERACTION ---------------------------
-if prompt := st.chat_input("Ask me something..."):
-    # Append user input to messages
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
+## --------------------------- USER INPUT & GEMINI API INTERACTION ---------------------------
+user_prompt = st.chat_input("Ask Gemini-Pro...")
+if user_prompt:
+    # Add user's message to chat and display it
+    st.chat_message("user").markdown(user_prompt)
 
-    # Call OpenAI API and handle responses
+    # Prepare the prompt by appending the subject string if it exists
+    full_prompt = st.session_state.subject_string + "\n" + user_prompt if st.session_state.subject_string else user_prompt
+
+    # Display spinner while waiting for Gemini's response
     with st.spinner("thinking..."):
         try:
-            # Build the prompt with subject customization
-            full_prompt = [{"role": "system", "content": st.session_state.subject_string}] if st.session_state.subject_string else []
-            full_prompt += [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages]
+            # Send user's message to Gemini and get the response
+            gemini_response = st.session_state.chat_session.send_message(full_prompt)
 
-            # Make OpenAI API call
-            response = ""
-            stream = client.chat.completions.create(
-                model=st.session_state.openai_model,
-                messages=full_prompt,
-                stream=True
-            )
-
-            # Stream the response
-            with st.chat_message("assistant") as message_container:
-                for chunk in stream:
-                    message_content = chunk["choices"][0].get("delta", {}).get("content", "")
-                    response += message_content
-                    message_container.markdown(response)
-            # Save assistant's message
-            st.session_state.messages.append({"role": "assistant", "content": response})
-        except openai.RateLimitError:
-            # Handle RateLimitError
-            error_message = random.choice(error_messages)
+            # Display Gemini-Pro's response
             with st.chat_message("assistant"):
-                st.markdown(error_message)
-            st.session_state.messages.append({"role": "assistant", "content": error_message})
+                st.markdown(gemini_response.text)
+
         except Exception as e:
-            # Handle any other exceptions
+            # Handle any other exceptions and display the error message
             error_message = f"**An error occurred:** {str(e)}"
             with st.chat_message("assistant"):
                 st.markdown(error_message)
-            st.session_state.messages.append({"role": "assistant", "content": error_message})
+
 
 
 ## --------------------------- SIDEBAR ABOUT SECTION ---------------------------
@@ -141,113 +134,3 @@ with st.sidebar:
         """,
         unsafe_allow_html=True
     )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#### footer
-
-# from htbuilder import HtmlElement, div, ul, li, br, hr, a, p, img, styles, classes, fonts
-# from htbuilder.units import percent, px
-# from htbuilder.funcs import rgba, rgb
-
-
-# def image(src_as_string, **style):
-#     return img(src=src_as_string, style=styles(**style))
-
-
-# def link(link, text, **style):
-#     return a(_href=link, _target="_blank", style=styles(**style))(text)
-
-
-# def layout(*args):
-
-#     style = """
-#     <style>
-#       # MainMenu {visibility: hidden;}
-#       footer {visibility: hidden;}
-#      .stApp { bottom: 105px; }
-#     </style>
-#     """
-
-#     style_div = styles(
-#         position="fixed",
-#         left=0,
-#         bottom=0,
-#         margin=px(0, 0, 0, 0),
-#         width=percent(100),
-#         color="black",
-#         text_align="center",
-#         height="auto",
-#         opacity=1
-#     )
-
-#     style_hr = styles(
-#         display="block",
-#         margin=px(8, 8, "auto", "auto"),
-#         border_style="inset",
-#         border_width=px(2)
-#     )
-
-#     body = p()
-#     foot = div(
-#         style=style_div
-#     )(
-#         hr(
-#             style=style_hr
-#         ),
-#         body
-#     )
-
-#     st.markdown(style, unsafe_allow_html=True)
-
-#     for arg in args:
-#         if isinstance(arg, str):
-#             body(arg)
-
-#         elif isinstance(arg, HtmlElement):
-#             body(arg)
-
-#     st.markdown(str(foot), unsafe_allow_html=True)
-
-
-# def footer():
-#     myargs = [
-#         "Made in ",
-#         image('https://avatars3.githubusercontent.com/u/45109972?s=400&v=4',
-#               width=px(25), height=px(25)),
-#         " with ❤️ by ",
-#         link("https://twitter.com/ChristianKlose3", "@ChristianKlose3"),
-#         br(),
-#         link("https://buymeacoffee.com/chrischross", image('https://i.imgur.com/thJhzOO.png')),
-#     ]
-#     layout(*myargs)
-
-
-# if __name__ == "__main__":
-#     footer()
